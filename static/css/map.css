@@ -1,0 +1,214 @@
+#map-wrapper {
+  position: relative;
+  padding-bottom: 45%;
+  width: 100%;
+  z-index: 0;
+}
+#map {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hAddr {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 3px;
+  box-shadow: rgb(0 0 0 / 15%) 0px 2px 2px 0px;
+  background-color: white;
+  opacity: 0.8;
+  gap: 0.7rem;
+  font-size: 0.9rem;
+}
+.bAddr {
+  border-radius: 3px;
+  padding: 5px;
+  background-color: white;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px black;
+}
+.hAddr .title,
+.bAddr .title {
+  font-weight: bold;
+}
+.control-type,
+.control-zoom {
+  position: absolute;
+  background-color: white;
+}
+.control-type {
+  top: 7px;
+  right: 7px;
+  z-index: 1;
+  display: flex;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  box-shadow: rgb(0 0 0 / 15%) 0px 2px 2px 0px;
+  gap: 2px;
+}
+.control-type span {
+  padding: 10px 7px;
+  font-size: 0.85em;
+  font-weight: bold;
+  border-radius: 3px;
+}
+
+.control-zoom {
+  top: 61px;
+  right: 7px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: rgb(0 0 0 / 15%) 0px 2px 2px 0px;
+}
+.control-zoom span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+}
+.control-zoom span:first-child {
+  border-bottom: 1px solid #c2c2c2;
+}
+.control-zoom span img {
+  width: 50%;
+  height: 50%;
+}
+.full-screen,
+#btnTerrain,
+#btnPosition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.full-screen {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  z-index: 1;
+}
+#btnPosition {
+  position: absolute;
+  top: 149px;
+  right: 7px;
+  z-index: 1;
+}
+.activedBtn {
+  background-color: rgb(51 150 255) !important;
+  color: white;
+}
+/* customoverlay */
+.customoverlay,
+.customoverlay2 {
+  border-radius: 6px;
+  opacity: 0.93;
+  width: 22em;
+  background-color: white;
+  box-shadow: 0px 0px 8px 1px #7a7a7a;
+  height: auto;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.customoverlay2 {
+  padding: 10px 0;
+}
+.customoverlay a,
+.customoverlay2 a {
+  color: #272727;
+  text-align: center;
+}
+.customoverlay .title,
+.customoverlay2 .title {
+  width: 100%;
+  display: block;
+  padding: 10px 0;
+  font-size: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.customoverlay a img {
+  width: 80%;
+  height: 150px;
+  border-radius: 3px;
+}
+
+.overlayMarker{
+  width: 25px;
+  height: 25px;
+  position: relative;
+}
+@media screen and (max-width: 768px) {
+  #map-wrapper {
+    padding-bottom: 70%;
+    height: auto;
+  }
+  .top-map .control-type {
+    top: calc(1vh + 40px);
+    flex-direction: column;
+    right: 6px;
+  }
+  .control-type span {
+    padding: 8px 4px;
+  }
+  .top-map .control-type span {
+    font-size: 0.6em;
+    padding: 12px 0px;
+    text-align: center;
+  }
+  .top-map .control-zoom {
+    top: calc(1vh + 160px);
+  }
+  .top-map #btnPosition {
+    top: calc(1vh + 240px);
+  }
+  .full-screen,
+  #btnTerrain,
+  #btnPosition {
+    width: 32px;
+    height: 32px;
+  }
+  .control-zoom span {
+    width: 32px;
+    height: 32px;
+  }
+  .full-screen{
+    display: none;
+  }
+}
+@media screen and (max-width: 480px) {
+  #map-wrapper {
+    padding-bottom: 100%;
+  }
+  .customoverlay,
+  .customoverlay2 {
+    width: 45vw;
+    padding-bottom: 8px;
+  }
+  .customoverlay .title,
+  .customoverlay2 .title {
+    font-size: 16px;
+    padding: 2px 0;
+  }
+  .customoverlay a img {
+    height: 90px;
+  }
+}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auth.css'%}" />
+{% endblock head %}
+
+{% block content %}
+<main class="auth-container">
+  <h2>계정 정보 수정</h2>
+  <div class="login-box">
+    <form id="account_update_form" action="/user/account_update/" method="POST">
+      {% csrf_token %}
+      <label for="name">이름</label>
+      <div class="with-error">
+        <input class="myInput" id="name" name="name_" type="text" value="{{user.name}}" required />
+        <div id="namec"></div>
+      </div>
+      <label for="mail">닉네임</label>
+      <div class="with-error">
+        <input class="myInput" id="mail" name="email_" type="email" value="{{user.nickname}}" required />
+        <div id="mailc"></div>
+      </div>
+      <input type="button" class="myBtn" value="정보 저장" onclick="validation()" />
+    </form>
+    <div class="home mobile"><a href="/">메인으로</a></div>
+  </div>
+</main>
+{% endblock content %}
+
+{% block script %}
+<script>
+  //아이디, 이메일주소, 전화번호는 DB에서 같은 값이 있는지 검사해야한다.
+  let name_check = false;
+  const nickNameRegExp = new RegExp(/^[가-힣a-zA-Z0-9]{2,20}$/); //총 20자
+  let n_RegExp = new RegExp(/^[가-힣]{2,10}$/); //이름 유효성검사 정규식 : 2~10의한글
+
+  //중복검사 후 값 변경 방지
+  let pass_email = false;
+  const initial_email = document.getElementById("mail").value;
+  document.getElementById("name").addEventListener("focusout", function () {
+    let msg = "";
+    let val = this.value;
+    if (!n_RegExp.test(val)) {
+      //이름 유효성검사
+      msg = "2~10자의 한글을 입력해주세요.";
+      name_check = false;
+    } else {
+      msg = "";
+      name_check = true;
+    }
+    document.getElementById("namec").textContent = msg;
+  });
+  document.getElementById("mail").addEventListener("focusout", function () {
+    let msg = "";
+    let val = this.value;
+    if (!nickNameRegExp.test(val)) {
+      //메일 유효성검사
+      msg = "2~20자의 영어,한글,숫자를 입력해주세요.";
+      email_check = false;
+    } else {
+      msg = "";
+      email_check = true;
+    }
+    document.getElementById("mailc").textContent = msg;
+  });
+  
+  function validation() {
+    let objEmail = document.getElementById("mail"); //메일
+    let objName = document.getElementById("name"); //이름
+
+    // ================ 이름 유효성검사 ================ //
+    if (objName.value == "") {
+      alert("이름을 입력해주세요.");
+      return false;
+    }
+    if (!n_RegExp.test(objName.value)) {
+      alert("올바른 이름이 아닙니다.");
+      return false;
+    }
+    // ================ email 유효성검사 ================ //
+    if (objEmail.value == initial_email) {
+      email_check = true;
+      pass_email = true;
+      document.getElementById("account_update_form").submit();
+      return true;
+    }
+    if (!document.getElementById('mail').value) {
+      // 이메일 입력여부 검사
+      alert("닉네임을 입력해주세요.");
+      return false;
+    }
+    if (!nickNameRegExp.test(objEmail.value)) {
+      //이메일 유효성 검사
+      alert("올바른  형식이 아닙니다.");
+      return false;
+    }
+    document.getElementById("account_update_form").submit();
+  }
+  document.getElementById("account_update_form").addEventListener(
+    "keydown",
+    function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+      }
+    },
+    true,
+  );
+</script>
+{% endblock script %}

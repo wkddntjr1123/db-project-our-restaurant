@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<style>
+  body{
+    background: url(/static/img/intro.jpg) no-repeat;
+    background-size: cover;
+    backdrop-filter: brightness(0.8);
+  }
+  main{
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10% 5%;
+    gap: 2em;
+  }
+  .sub_container{
+    flex: 1;
+    background: white;
+    opacity: 0.9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0 0 3px 1px #c2c2c2;
+    border-radius: 3px;
+    gap: 2em;
+  }
+  .sub_container > h2 {
+    padding: 2em;
+  }
+  .sub_container .contents-area{
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+  }
+</style>
+{% endblock head %}
+
+{% block content %}
+  <div class="sub_container">
+    <h2>내가 만든 그룹 관리</h2>
+    <!-- <div class="contents-area"> 멤버초대 버튼 / 속한멤버리스트(멤버삭제)</div> -->
+    <ul class="contents-area">
+      <li>test</li>
+    </ul>
+  </div>
+  <div class="sub_container">
+    <h2>내가 속한 그룹</h2>
+    <!-- <div class="contents-area">속한그룹리스트 (탈퇴/멤버보기)</div> -->
+    <ul class="contents-area">
+      <li>test</li>
+    </ul>
+  </div>
+  <div class="sub_container">
+    <h2>내가 받은 초대</h2>
+    <!-- <div class="contents-area">초대요청리스트 (초대수락/초대거절)</div> -->
+    <ul class="contents-area">
+      <li>test</li>
+    </ul>
+  </div>
+  
+{% endblock content %}
+
+{% block script %}
+<script>
+  function createGroup(){
+
+  }
+  function inviteUser(){
+
+  }
+  function acceptInvite(){
+
+  }
+</script>
+{% endblock script %}

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    {% load static %}
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>우리만의 맛집</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Noto Sans KR 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500&display=swap" rel="stylesheet" />
+    <!-- base.html css -->
+    <link rel="stylesheet" href="{% static 'css/base.css'%}" />
+    <!-- 지도 관련 CSS -->
+    <link rel="stylesheet" href="{% static 'css/map.css'%}" />
+    <!-- Jquery 3.6.0버전 -->
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <!-- 지도API 및 라이브러리 -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ff5ed0e4cdb468aeb2de5fd2f151bfc1&libraries=services,clusterer,drawing"></script>
+    {% block head %}
+    {% endblock head %}
+  </head>
+  <body>
+    <header class="header header-show">
+      <div class="logo pc">
+        <a href="/">우리만의 맛집</a>
+      </div>
+      <div class="search-box">
+      </div>
+      <nav id="menu" class="menu" tabindex="-1">
+        <button class="menu_button menu_button--open js-open" aria-label="Open menu" aria-expanded="false" type="button">&#9776;</button>
+        <div class="menu_list">
+          <button class="menu_button menu_button--close js-close" aria-label="Close menu" aria-expanded="true" type="button">&times;</button>
+          <ul class="menu_list_inner">
+            <!-- 로그인 된 상태면 -->
+            {% if user.is_authenticated %}
+              <li class="menu_item logon">
+                <small>●&nbsp;</small>{{user.nickname}}님
+              </li>
+            {% endif %}
+            <li class="menu_item" onclick="location.href='/';">
+              <span>맛집보기</span>
+            </li>
+            <li class="menu_item" onclick="location.href='/user/management/';">
+              <span>그룹관리</span>
+            </li>
+            <li class="menu_item profile pc" onclick="showProfile()">
+              <!-- 로그인 된 상태면 -->
+              {% if user.is_authenticated %}
+                <svg class="menu_item profile-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path class="profile-icon" d="M0 0h24v24H0V0z" fill="none"/><path class="profile-icon" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.51.88 4.93 1.78C15.57 19.36 13.86 20 12 20s-3.57-.64-4.93-1.72zm11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6zm0 5c-.83 0-1.5-.67-1.5-1.5S11.17 8 12 8s1.5.67 1.5 1.5S12.83 11 12 11z"/></svg>
+                <div class="profile-detail hide">
+                  <div class="diamond"></div>
+                  {% if user.is_superuser %}
+                  <a href="/user/management/">
+                    <div class="profile-list-item">관리</div>
+                  </a>
+                  {% else %}
+                  <a href="/user/mypage/">
+                    <div class="profile-list-item">마이페이지</div>
+                  </a>  
+                  {% endif %}
+                  <a href="/user/logout/">
+                  <div class="profile-list-item">로그아웃</div>
+                  </a>
+                </div>
+              <!-- 로그인 안된 상태면 -->
+              {% else %}
+                <button class="myBtn" onclick=" window.open('/user/login/', '_self')">로그인</button>
+              {% endif %}
+            </li>
+            <li class="menu_item mobile mobile-link">
+              {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <a href="/user/management/">
+                  <div class="myBtn">관리</div>
+                </a>
+                {% else %}
+                <a href="/user/mypage/">
+                  <div class="myBtn">마이페이지</div>
+                </a>  
+                {% endif %}
+                <a href="/user/logout/">
+                <div class="myBtn">로그아웃</div>
+                </a>
+              <!-- 로그인 안된 상태면 -->
+              {% else %}
+                <button class="myBtn" onclick=" window.open('/user/login/', '_self')">로그인</button>
+              {% endif %}
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <main class="blur" id="main">
+    {% block content %}
+    {% endblock content %}
+    </main>
+    <script>
+      /*****header profile열기*****/
+      function showProfile(event){
+        document.getElementsByClassName("profile-detail")[0].classList.remove("hide");
+      }
+      /*****header profile닫기*****/
+      document.addEventListener("click", function(event){
+        {% if not user.is_authenticated %}
+          return false;
+        {% endif %}
+        if(!event.target.classList.contains("profile-icon") && !event.target.classList.contains("profile-detail") ){
+          document.getElementsByClassName("profile-detail")[0].classList.add("hide");
+        }
+      })
+      /*****header 햄버거 메뉴*****/
+      function toggleNav(status, scope) {
+        document.documentElement.classList.toggle("has-open-menu");
+        if (status == "open") {
+          scope.addEventListener("transitionend", () => {
+            scope.querySelector(".js-close").focus();
+          });
+        }
+        if (status == "close") {
+          scope.querySelector(".js-open").focus();
+        }
+      }
+      /*햄버거 메뉴 열기 : 햄버거 클릭*/
+      const menu = document.querySelector(".menu");
+      menu.addEventListener(
+        "click",
+        (event) => {
+          const openButton = menu.querySelector(".js-open");
+          const closeButton = menu.querySelector(".js-close");
+
+          if (event.target == openButton) {
+            toggleNav("open", menu);
+          } else if (event.target == closeButton || !event.target.closest(".menu_list")) {
+            toggleNav("close", menu);
+          }
+        }, true
+      );
+      /*햄버거 메뉴 닫기 : esc*/
+      document.addEventListener("keydown", (event) => {
+        const escapeKey = 27;
+        if (event.keyCode === escapeKey && document.documentElement.classList.contains("has-open-menu")) {
+          document.documentElement.classList.remove("has-open-menu");
+        }
+      });
+
+      //팝업창 배경 블러링 처리
+      document.addEventListener("DOMContentLoaded", function () {
+        $(".popOpenBtn").on("click", function () {
+          $("#popUp").fadeIn(200);
+          $(".blur").css("filter","blur(2px)");
+          $(".logo").css("filter","blur(2px)");
+          $(".search-box").css("filter","blur(2px)");
+          $(".menu_list").css("filter","blur(2px)");
+        });
+
+        $("#popCloseBtn").on("click", function () {
+          $("#popUp").fadeOut(200);
+          $(".blur").css("filter","blur(0)");
+          $(".logo").css("filter","blur(0)");
+          $(".search-box").css("filter","blur(0)");
+          $(".menu_list").css("filter","blur(0)");
+        });
+      });
+
+      //일반 검색 제출
+      function checkKeyword() {
+        if (document.getElementById("searchtext").value.length >= 2) {
+          document.getElementById("search_form").submit();
+        } else {
+          alert("검색어를 2글자 이상 입력해야 합니다.");
+          return false;
+        }
+      }
+      if (document.getElementById("search_form")) {
+        document.getElementById("search_form").addEventListener(
+          "keydown",
+          function (event) {
+            if (event.keyCode === 13) {
+              event.preventDefault();
+              checkKeyword();
+            }
+          },
+          true,
+        );
+      }
+      //advanced 검색 제출
+      function advanced_submit() {
+        let check = false;
+        const advancedForm = document.getElementById('advanced_form');
+        for(let i=0; i<advancedForm.elements.length; i++){
+          if(advancedForm.elements[i].value !== "option" && advancedForm.elements[i].value){
+            check=true;
+          }
+        }
+        if (check) {
+          document.getElementById("advanced_form").submit();
+        } else {
+          alert("최소 하나의 항목은 입력해야합니다.");
+        }
+      }
+
+      const BASE_CENTER =  new kakao.maps.LatLng(35.84672175434495, 127.12941417073887); //자료 없으면 기본 중앙값
+      /*map이 있으면##################################Map관련 공통 함수들 : map,bounds 필요########################################*/
+      if (document.getElementById("map")) {
+        //###### 1. 지도 컨트롤 부분######
+        window.addEventListener("load", function () {
+          initMapType();
+        });
+        function initMapType() {
+          const roadmapControl = document.getElementById("btnRoadmap");
+          const skyviewControl = document.getElementById("btnSkyview");
+          const terrainControl = document.getElementById("btnTerrain");
+          roadmapControl.classList.add("activedBtn");
+          skyviewControl.classList.add("btna");
+          terrainControl.classList.add("btna");
+          map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP); //초기값 : 일반지도
+          //map.addOverlayMapTypeId(kakao.maps.MapTypeId.TERRAIN); //초기값 : 지형도
+        }
+        function setMapType(maptype) {
+          const roadmapControl = document.getElementById("btnRoadmap");
+          const skyviewControl = document.getElementById("btnSkyview");
+          const terrainControl = document.getElementById("btnTerrain");
+          if (maptype === "roadmap") {
+            map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+            if(document.getElementsByClassName('titleOverlay')){
+              for(let i=0; i<document.getElementsByClassName('titleOverlay').length; i++){
+                document.getElementsByClassName('titleOverlay')[i].classList.remove('white');
+              }
+            }
+            roadmapControl.className = "activedBtn";
+            skyviewControl.className = "btna";
+          } else if (maptype === "skyview") {
+            map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+            if(document.getElementsByClassName('titleOverlay')){
+              for(let i=0; i<document.getElementsByClassName('titleOverlay').length; i++){
+                document.getElementsByClassName('titleOverlay')[i].classList.add('white');
+              }
+            }
+            roadmapControl.className = "btna";
+            skyviewControl.className = "activedBtn";
+          } else {
+            const is_activated = terrainControl.classList.contains("activedBtn");
+            terrainControl.classList.toggle("activedBtn");
+            if (is_activated) {
+              map.removeOverlayMapTypeId(kakao.maps.MapTypeId.TERRAIN);
+              document.getElementById("terrain_img").src = "{% static 'img/terrain_b.png'%}";
+            } else {
+              map.addOverlayMapTypeId(kakao.maps.MapTypeId.TERRAIN);
+              document.getElementById("terrain_img").src = "{% static 'img/terrain_w.png'%} ";
+            }
+          }
+        }
+        //줌인
+        function zoomIn() {
+          map.setLevel(map.getLevel() - 1);
+        }
+        //줌아웃
+        function zoomOut() {
+          map.setLevel(map.getLevel() + 1);
+        }
+        //지도 전체화면
+        function openFullscreen() {
+          let elem = document.getElementById("map");
+          if (!document.fullscreenElement) {
+            //풀스크린이 아니면
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              /* Safari */
+              elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+              /* IE11 */
+              elem.msRequestFullscreen();
+            }
+          } else {
+            //이미 풀스크린이면
+            document.exitFullscreen();
+          }
+          //풀스크린이벤트시 마커 범위로
+          elem.addEventListener("fullscreenchange", function () {
+            if (typeof bounds !== "undefined") {
+              map.setBounds(bounds);
+              map.setLevel(map.getLevel() + 1); //지도가 너무 가까워서 레벨 +1
+            } else if (latitude) {
+              map.setCenter(new kakao.maps.LatLng(latitude, longitude));
+            }
+          });
+        }
+        //###### 2.지도 주소 함수 #####
+        //대략적인 주소 검색 : 좌측 상단용
+        const geocoder = new kakao.maps.services.Geocoder(); //주소-좌표 변환 객체용 변수
+        function searchAddrFromCoords(coords, callback) {
+          geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);
+        }
+        //법정동 상세주소 검색 : 인포윈도우용
+        function searchDetailAddrFromCoords(coords, callback) {
+          geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+        }
+        //좌측 상단에 주소 표시하는 함수
+        function displayCenterInfo(result, status) {
+          //지도 좌측상단에 지도 중심좌표에 대한 주소정보를 표출하는 함수
+          if (status === kakao.maps.services.Status.OK) {
+            let infoDiv = document.getElementById("centerAddr");
+            for (let i = 0; i < result.length; i++) {
+              // 행정동의 region_type 값은 'H'
+              if (result[i].region_type === "H") {
+                infoDiv.innerHTML = result[i].address_name;
+                break;
+              }
+            }
+          }
+        }
+      }
+      /*##### 현재위치 geolocation #####*/
+      let current_pos_marker = null;
+      let current_infowindow = null;
+      function current_position(){
+        //현재 위치 geolocation 사용 가능하다면
+        if(navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition( (pos) => {
+            const lat = pos.coords.latitude;  //현재위치위도
+            const lon = pos.coords.longitude; //현재const도
+            const current_location =  new kakao.maps.LatLng(lat,lon); //현재 위치를 좌표로 생성
+            const imageSrc = "{% static 'img/step_marker_test.png'%}";
+            const imageSize = new kakao.maps.Size(40, 42); // 마커이미지의 크기
+            const imageOption = {offset: new kakao.maps.Point(27, 69)}; // 마커이미지의 옵션. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정.
+            const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+            current_infowindow = new kakao.maps.CustomOverlay({
+            })
+            //이미 마커가 있는 경우 다시 마커를 생성하지 않음.
+            if(!current_pos_marker || pos.coords.latitude.toFixed(6)!==current_pos_marker.getPosition().Ma.toFixed(6) || pos.coords.longitude.toFixed(6)!==current_pos_marker.getPosition().La.toFixed(6)){
+              current_pos_marker = new kakao.maps.Marker({
+                map : map,
+                position : current_location,
+                image: markerImage,
+                clickable : false,
+              });
+            }
+            map.panTo(current_location);
+          })
+        }
+      }
+    </script>
+    {% block script %}
+    {% endblock script %}
+  </body>
+</html>

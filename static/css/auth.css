@@ -1,0 +1,161 @@
+body {
+  display: flex;
+  flex-direction: column;
+}
+#main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5% 0;
+}
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 1px black;
+  color: #de9900;
+}
+.login-box {
+  width: 100%;
+  padding: 25px;
+  border: 2px solid #c2c2c2;
+  border-radius: 6px;
+}
+.login-box .login-box-link {
+  font-size: 13px;
+  color: #696969;
+  margin-top: 35px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+.login-box .login-box-link a:nth-child(2) {
+  float: right;
+}
+#account_update_form label,
+#account_form label,
+#pwd_change_form label,
+#pwd_form label,
+#login-form label,
+#signup_form label,
+#management_form label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: -1px;
+  color: #555555;
+}
+#account_update_form input,
+#account_form input,
+#pwd_change_form input,
+#pwd_form input,
+#login-form input,
+#signup_form input {
+  width: 100%;
+  margin: 10px 0 30px 0;
+  padding: 13px 10px;
+  font-size: 17px;
+}
+.readonly {
+  background-color: #ededed;
+  cursor: default;
+}
+.login-box .myBtn {
+  width: 100%;
+  border-radius: 6px;
+  padding: 16px;
+}
+.with-error {
+  position: relative;
+}
+.with-error > .msg {
+  width: 100%;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  color: #0089ff;
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+  left: 50%;
+}
+#idc,
+#namec,
+#mailc,
+#pwdc,
+#pwdc1,
+#pwdc2 {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 10px;
+  font-size: 14px;
+  color: #0089ff;
+}
+.home {
+  display: none;
+  justify-content: center;
+  font-size: 14px;
+  color: #515daf;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 30px;
+}
+.home a {
+  cursor: pointer;
+}
+.management-page {
+  max-width: none;
+}
+.management-page .delBtn {
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0px 0px 2px 0px #6a6a6a;
+  cursor: pointer;
+}
+.management-page #management_form {
+  text-align: center;
+}
+.management-page table {
+  color: #696969;
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+}
+.management-page table thead {
+  border-bottom: 2px solid #d0d0d0;
+  font-weight: bold;
+}
+.management-page table tbody tr {
+  border-bottom: 1px solid #d0d0d0;
+}
+.management-page table th,
+.management-page table td {
+  padding: clamp(3px, 1vw, 8px);
+  text-align: center;
+}
+.management-page .myBtn {
+  margin-top: 50px;
+  padding: 6px 15px;
+  width: 50%;
+}
+@media screen and (max-width: 768px) {
+  .auth-container h2 {
+    border-bottom: 2px solid #d4b86a;
+    padding: 0 30px 12px 30px;
+  }
+  .login-box {
+    border: none;
+  }
+  .login-box .login-box-link {
+    margin-top: 20px;
+  }
+  .login-box .home {
+    display: block;
+  }
+  .management-page .myBtn {
+    margin-top: 30px;
+  }
+  .management-page .home {
+    margin-top: 30px;
+  }
+}

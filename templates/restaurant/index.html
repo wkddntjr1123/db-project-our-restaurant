@@ -1,0 +1,876 @@
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/browse.css' %}" />
+<link rel="stylesheet" href="{% static 'css/bxSlider.css' %}" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<script src="{% static 'js/bxSlider.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/rateit.css' %}">
+<script src="{% static 'js/jquery.rateit.min.js' %}"></script>
+{% endblock head %}
+
+{% block content %}
+<section>
+  <div class="map-wrapper top-map" id="map-wrapper">
+    <!-- 지도 -->
+    <div id="map"></div>
+    <!-- 지도타입 버튼 -->
+    <div class="control-all-box control-show">
+      <div class="control-type">
+        <span id="btnRoadmap" onclick="setMapType('roadmap')">지도</span>
+        <span id="btnSkyview" onclick="setMapType('skyview')">위성</span>
+        <span id="btnTerrain" onclick="setMapType('terrain')"><img id="terrain_img" src="{% static 'img/terrain_b.png'%} " /></span>
+      </div>
+      <!-- 지도 확대, 축소 버튼  -->
+      <div class="control-zoom">
+        <span onclick="zoomIn()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          </svg>
+        </span>
+        <span onclick="zoomOut()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path d="M19 13H5v-2h14v2z" />
+          </svg>
+        </span>
+      </div>
+      <!-- 현위치 버튼 -->
+      <span id="btnPosition" onclick="current_position();"><img src="/static/img/current_position.png" /></span>
+    </div>
+    <!-- fullscreen 버튼 -->
+    <div class="full-screen" id="full-screen" onclick="openFullscreen();">
+      <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 0 24 24" width="32px" fill="#000000">
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+      </svg>
+    </div>
+    <!-- 지도 디테일 fold 영역 -->
+    <div class="fold-container fold-container-hide">
+      <div class="mobile close-box">
+        <span id="closeBtn" onclick="toggleChevron();">✕</span>
+      </div>
+      <!-- 지도 검색 input 및 필터링 박스 -->
+      <div class="filter-box filter-show">
+        <div class="input-box">
+          <div class="search-input-wrapper">
+            <input id="search-input"class="map-search map-search-show" placeholder="검색어를 입력해주세요."/>
+            <div class="search-icon" id="map-search-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 0 24 24" width="26px" fill="#ffffff"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="filter-wrapper">
+          <div class="filter-head" onclick="openFilterDetail();">
+            <div class="filter-text">필터를 설정해 주세요.</div>
+            <div class="filter-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="#525252" viewBox="0 0 32 32"><defs><style>.cls-1{fill:none;}</style></defs><title/><g data-name="Layer 2" id="Layer_2"><path d="M28,9H11a1,1,0,0,1,0-2H28a1,1,0,0,1,0,2Z"/><path d="M7,9H4A1,1,0,0,1,4,7H7A1,1,0,0,1,7,9Z"/><path d="M21,17H4a1,1,0,0,1,0-2H21a1,1,0,0,1,0,2Z"/><path d="M11,25H4a1,1,0,0,1,0-2h7a1,1,0,0,1,0,2Z"/><path d="M9,11a3,3,0,1,1,3-3A3,3,0,0,1,9,11ZM9,7a1,1,0,1,0,1,1A1,1,0,0,0,9,7Z"/><path d="M23,19a3,3,0,1,1,3-3A3,3,0,0,1,23,19Zm0-4a1,1,0,1,0,1,1A1,1,0,0,0,23,15Z"/><path d="M13,27a3,3,0,1,1,3-3A3,3,0,0,1,13,27Zm0-4a1,1,0,1,0,1,1A1,1,0,0,0,13,23Z"/><path d="M28,17H25a1,1,0,0,1,0-2h3a1,1,0,0,1,0,2Z"/><path d="M28,25H15a1,1,0,0,1,0-2H28a1,1,0,0,1,0,2Z"/></g><g id="frame"><rect class="cls-1" height="32" width="32"/></g></svg>
+              <span>필터</span>
+            </div>
+          </div>
+          <div class="filter-content hide">
+            <div class="content-head">
+              <span onclick="document.getElementsByClassName('filter-content')[0].classList.add('hide');">✕</span>
+              <span>필터</span>
+              <span onClick="resetFilter();">
+                <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#676767"><g><path d="M0,0h24v24H0V0z" fill="none"/></g><g><g><path d="M6,13c0-1.65,0.67-3.15,1.76-4.24L6.34,7.34C4.9,8.79,4,10.79,4,13c0,4.08,3.05,7.44,7,7.93v-2.02 C8.17,18.43,6,15.97,6,13z M20,13c0-4.42-3.58-8-8-8c-0.06,0-0.12,0.01-0.18,0.01l1.09-1.09L11.5,2.5L8,6l3.5,3.5l1.41-1.41 l-1.08-1.08C11.89,7.01,11.95,7,12,7c3.31,0,6,2.69,6,6c0,2.97-2.17,5.43-5,5.91v2.02C16.95,20.44,20,17.08,20,13z"/></g></g></svg>
+                필터 초기화
+              </span>
+            </div>
+            <div class="content-body">
+              <form id="filter-form" class="option-box">
+                <div class="row">
+                  <div class="option">
+                    <label>상호명</label>
+                    <input type="text" name="name"/>
+                  </div>
+                  <div class="option">
+                    <label>메뉴</label>
+                    <input type="text" name="menus"/>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="option" style="flex:1;">
+                    <label>주소</label>
+                    <input type="text" name="location"/>
+                  </div>
+                </div>
+              </form>
+              <div class="filter-apply">
+                <button type="button" class="filter-apply" onClick="applyFilter();">적용하기</button>
+              </div>
+            </div>
+          </div>
+            
+        </div>
+      </div>
+      <div class="content-box">
+        <div class="chip">
+          <button id="allPostBtn" type="button" class="chip-btn list-all activated" onClick="showAllResult(event);">전체 게시물</button>
+          <button id="filteredPostBtn" type="button" class="chip-btn" onclick="showFilteredResult(event);">필터링 결과</button>
+        </div>
+        <div class="recent-comment"></div>
+        <div class="recent-box"></div>
+        <div class="image-box hide"></div>
+      </div> 
+      <!-- chevron -->
+      <button id="fold-btn" onclick="toggleChevron()">
+          <!-- right -->
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/></svg>
+          <!-- left -->
+          <svg class="hide" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/></svg>
+      </button>
+    </div>
+    <style>
+      #review-box{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #00000059;
+        z-index: 10;
+      }
+      #review-box-inner{
+        width: 70%;
+        height: 70%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 0 5px 1px #474747;
+      }
+      .review-hide{
+        position: absolute;
+        z-index: 11;
+        padding: 14px 16px;
+        background: transparent;
+        display: block;
+        top: 0;
+        right: 0;
+        font-size: 1.3em;
+        font-weight: bold;
+      }
+      .ui-widget.ui-widget-content{
+        height: 100%;
+      }
+      .ui-tabs .ui-tabs-nav{
+        padding: 0.5em 0.2em;
+      }
+      .ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+        font-weight: bold;
+        font-family: 'Noto Sans KR';
+        border-radius: 3px;
+        box-shadow: 0 0 1px 1px #7f7f7f;
+      }
+      #rest-container{
+        display: flex;
+        flex-direction: column;
+        font-family: 'Noto Serif KR';
+        box-shadow: 0 0 1px 2px #c2c2c2;
+        margin: 15px;
+        padding: 0;
+        flex:1;
+      }
+      #rest-container .review-row{
+        display: flex;
+        padding: 8px;
+      }
+      #rest-container .review-row:nth-child(2n-1){
+        background-color: #ebebeb;
+      }
+      #rest-container .review-row .rest-title{
+        font-family: 'Noto Serif KR';
+        width: 95px;
+        font-weight: bold;
+      }
+      #rest-container .review-row .rest-data{
+        font-size: 0.9em;
+      }
+      #comment-box{
+        display: flex;
+        position: relative;
+        flex-direction: column;
+        border-radius: 5px;
+        margin: 15px;
+        box-shadow: 0 0 4px 1px #757575;
+        font-family: 'Noto Serif KR';
+        overflow: hidden;
+        flex: 1;
+      }
+      #comment-box .comment-user{
+        padding: 8px;
+        font-weight: bold;
+        border-bottom: 2px solid #e0e0e0;
+      }
+      #comment-box .comment-comment{
+        padding: 8px;
+        border: none;
+        resize: none;
+        font-family: 'Noto Serif KR';
+        font-size: 0.9em;
+        height: calc(100% - 69px);
+      }
+      #comment-box .comment-btn{
+        position: absolute;
+        right: -1px;
+        bottom: 0px;
+        width: 101%;
+      }
+      .rateit{
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 7px;
+      }
+      .rateit button.rateit-reset{
+        display: none !important;
+      }
+      #comment-list{
+        display: flex;
+        flex-direction: column;
+        padding: 17px;
+        font-family: 'Noto Sans KR';
+      }
+      #comment-list .comment-list-item{
+        display: flex;
+        gap: 7px;
+        box-shadow: 0 0 2px 0px #d0d0d0;
+        padding: 8px;
+      }
+      #comment-list .comment-list-item .user{
+        font-weight: bold;
+        font-size: 1.1em;
+        width: 110px;
+        text-align: center;
+        white-space: nowrap;
+      }
+      #comment-list .comment-list-item .score{
+        padding-right: 10px;
+      }
+      #comment-list .comment-list-item .score svg.scored{
+        width: 17px;
+        height: 17px;
+        fill: #ff6060;
+      } 
+      #comment-list .comment-list-item .score svg.no-scored{
+        width: 17px;
+        height: 17px;
+        fill: #7f7f7f;
+      } 
+      #comment-list .comment-list-item .contents{
+        flex: 1;
+      }
+      #comment-list .comment-list-item .delete{
+        background-color: transparent;
+        font-weight: bold;
+      }
+    </style>
+    <div id="review-box" class="hide">
+      <div id="review-box-inner">
+        <div id="tabs">
+          <ul>
+            <li><a href="#tabs-1">모든 리뷰</a></li>
+            <li><a href="#tabs-2">그룹원 리뷰</a></li>
+          </ul>
+          <div id="tabs-1">
+            <div style="display: flex;">
+              <div id="rest-container"></div>
+              <div id="comment-box">
+                <div class="comment-user">리뷰</div>
+                <textarea id="comment-comment" class="comment-comment" placeholder="추천하는 이유는?"></textarea>
+                <select id="starRange">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+                <div class="rateit" id="stars" data-rateit-backingfld="#starRange" data-rateit-min="0"></div>
+                <button type="button" id="comment-btn" class="myBtn comment-btn" onclick="commentHandler()">등록</button>
+              </div>
+            </div>
+            <ul id="comment-list"></ul>
+          </div>
+          <div id="tabs-2">
+            그룹리뷰
+          </div>
+        </div>
+        <button class="review-hide" onclick="hideReviewBox();">✕</button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
+
+{% block script %} 
+<script>
+const isMobile = window.matchMedia("(max-width: 768px)").matches;
+let reviewId = null;
+//모바일일 경우
+if(isMobile){
+
+} else {
+  document.getElementsByClassName('fold-container')[0].classList.remove('fold-container-hide');
+  document.getElementById('fold-btn').children[0].classList.add('hide');
+  document.getElementById('fold-btn').children[1].classList.remove('hide');
+}
+/*##################################지도설정부분##################################*/
+  const mapOption = {
+    center: BASE_CENTER, // 지도의 중심좌표
+    level: 3, // 지도의 확대 레벨
+    disableDoubleClickZoom: true,
+  };
+  const mapContainer = document.getElementById('map'); // 지도 컨테이너
+  const map = new kakao.maps.Map(mapContainer, mapOption);
+  const bounds = new kakao.maps.LatLngBounds();   //마커들이 모두 보이게 지도 범위 재설정할 객체
+  
+  let customInfowindow = new kakao.maps.CustomOverlay({
+    map: map,
+    clickable: true,
+    xAnchor: 0.5,
+    yAnchor: 1.15,
+    zIndex: 3
+  });
+  const geocoder = new kakao.maps.services.Geocoder();//주소-좌표 변환 객체
+  const ps = new kakao.maps.services.Places(); //장소 검색 객체
+  const clusterer = new kakao.maps.MarkerClusterer({
+    map: map,
+    gridSize: 75,
+    averageCenter: true,
+    minLevel: 2,
+    minClusterSize : 3,
+  });
+  //모바일이면 한번 클릭시 인포윈도우 닫기, 인포윈도우 안열려있으면 맵 클릭 시 헤더 숨겼다 감추기 이벤트
+  let timer = true; //더블클릭 간격 계산 : 더블클릭 시 헤더가 사라졌다 나타나는 것을 방지
+  function toggleHeader(){
+    if(customInfowindow.getMap()){
+      customInfowindow.setMap(null);
+      return false;
+    }
+    if(timer) {
+      document.getElementsByClassName('header')[0].classList.toggle('header-show');
+      document.getElementsByClassName('control-all-box')[0].classList.toggle('control-show');
+    }
+  }
+
+  kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+    clearTimeout(timer);
+    timer = setTimeout(function(){
+      toggleHeader();
+    },300);
+  });
+  kakao.maps.event.addListener(map, 'zoom_changed', function() {
+    customInfowindow.setMap(null);
+  });
+  //chevron화살표 토글
+  function toggleChevron(){
+    for(let i=0; i<document.getElementById('fold-btn').children.length; i++){
+      document.getElementById('fold-btn').children[i].classList.toggle('hide');
+    }
+    if(document.getElementById('fold-btn').children[0].classList.contains('hide')){
+      document.getElementsByClassName('fold-container')[0].classList.remove('fold-container-hide');
+    } else {
+      document.getElementsByClassName('fold-container')[0].classList.add('fold-container-hide');
+    }
+  }
+  
+  //지도의 영역 계산 -> 서버에서 해당 보이는 부분의 마커 정보(id,title,latitude,longitude,classificationId,color)받아오고, 마커를 지도에 업데이트
+  //추가적으로 필터링이 적용중이면 필터링 ajax 사용
+  //필터링 flag 변경을 감지해서 필터의 적용 유무를 알려줌
+  const filterFlag = {"isFiltering":false};
+  const filterFlagHandler = {
+    set: (obj, name, value) => {
+        if(value){
+          filterFlag.isFiltering = value;
+          searchFlag.isSearching = false;
+          searchValue = "";
+          document.getElementsByClassName('filter-text')[0].textContent = "필터가 적용 중입니다.";
+          document.getElementsByClassName('filter-text')[0].classList.add('activated');
+        } else {
+          filterFlag.isFiltering = value;
+          resetFilter();
+          document.getElementsByClassName('filter-text')[0].textContent = "필터를 설정해 주세요.";
+          document.getElementsByClassName('filter-text')[0].classList.remove('activated');
+        }
+    }
+  };
+  const searchFlag = {"isSearching":false};
+  const searchFlagHandler = {
+    set: (obj, name, value) => {
+        if(value){
+          searchFlag.isSearching = value;
+          filterWatcher.isFiltering = false;
+        } else {
+          searchFlag.isSearching = value;
+          searchValue = "";
+        }
+    }
+  };
+  const filterWatcher = new Proxy(filterFlag, filterFlagHandler);
+  const searchWatcher = new Proxy(searchFlag, searchFlagHandler);
+  
+  //현재 영역의 지도 마커 데이터 불러오기
+  //filterWatcher.isFiltering , searchWatcher.isSearching에 따라 지도 마커 업데이트 요청이 다름
+  function getBoundaryPost(isMain){
+    if (map.getLevel() > 4 ){
+      clusterer.clear();
+      /*
+        구획 폴리곤 로직
+      */
+      return false;
+    }
+    // 지도 영역정보를 얻어옴 
+    const bounds = map.getBounds();
+    // 영역정보의 남서쪽 정보 
+    const swLatlng = bounds.getSouthWest();
+    // 영역정보의 북동쪽
+    const neLatlng = bounds.getNorthEast();
+    const boundData = {
+      "swLat": swLatlng.getLat(),
+      "swLng": swLatlng.getLng(),
+      "neLat": neLatlng.getLat(),
+      "neLng": neLatlng.getLng(),
+    };
+    //필터링이 적용중이면 filter option값 추가해서 보내고, searching이라면 keyword추가해서 보냄
+    if(isMain){
+
+    } else if(filterWatcher.isFiltering){
+      const form = document.getElementById('filter-form');
+      boundData['isFiltering'] = true;
+      boundData['name'] = filterName;
+      boundData['menus'] = filterMenus;
+      boundData['location'] = filterLocation;
+    } else if(searchWatcher.isSearching){
+      boundData['keyword'] = searchValue;
+    }
+    $.ajax({
+      url: "/get-boundary-post/",
+      type: "GET",
+      cache: false,
+      data: boundData,
+      success: function (data) {
+        boundPosts =  JSON.parse(data);
+        updateMarkersOnMap(boundPosts);  //지도에 포스트에 대한 마커들 업데이트
+      }
+    })
+  }
+
+  //지도 idle이벤트 시, 뷰포트 범위에 마커 업데이트 및 맵레벨 3이하로 낮아지면 타이틀 표시
+  //브라우저 resize시 idle이벤트가 너무 많이 발생하므로 타이머 추가
+  let idleTimer = null;
+  kakao.maps.event.addListener(map, 'idle', ()=>{
+    clearTimeout(idleTimer)
+    idleTimer = setTimeout(()=>{
+      if(!document.getElementById("allPostBtn")){
+        getBoundaryPost(true);
+        return;
+      }
+      if(document.getElementById("allPostBtn").classList.contains("activated")){
+        getBoundaryPost(true);
+        return;
+      } else {
+        getBoundaryPost();
+        return;
+      }
+      
+    },70);
+  });
+  //지도 로드 완료시 뷰포트 영역에 마커 업데이트
+  window.addEventListener('load', function(){
+    customInfowindow.setMap(null);
+    getBoundaryPost();
+    getPagedPosts();
+  
+  });
+  
+  //인포윈도우 정보 가져오고 인포윈도우 열기
+  function getOverlayInfo(id, latitude, longitude){
+    const latLng = new kakao.maps.LatLng(latitude, longitude);
+    $.ajax({
+      url: `/get-overlay-info/${String(id)}/`,
+      success : function(data){
+        if(!document.getElementsByClassName('header')[0].classList.contains('header-show')){
+          toggleHeader();
+        }
+      
+        customInfowindow.setMap(null);
+        customInfowindow = new kakao.maps.CustomOverlay({
+          map: map,
+          clickable: true,
+          xAnchor: 0.5,
+          yAnchor: 1.18,
+          zIndex: 3
+        });
+        const content = $(`<div class="customOverlay" onClick="openReviewBox(${id})">
+            <a href="#">
+              <div class="content">
+                <div>
+                  <span class="title">${data.name}</span>
+                  <span class="class">${data.menus}</span>
+                </div>
+                ${data.phone && `<span style="display:inline-block;color:#565656;padding:6px 1px;font-size:0.9em;">(${data.phone})</span>`}
+                <br/>
+                <div>
+                  <span class="loc" style="display:inline-block;margin-bottom:8px;white-space:pre-wrap;">${data.numberAddr}</span><br/>
+                  <span class="loc" style="white-space:pre-wrap;">${data.roadAddr}</span>
+                </div>
+              </div>
+            </a>
+            <div class="diamond"></div>
+          </div>
+          `);
+        customInfowindow.setContent(content[0]);
+        customInfowindow.setPosition(latLng);
+        map.panTo(latLng);
+        setTimeout(function(){
+          customInfowindow.setMap(map);
+        },300);
+      }
+    })
+  }
+
+  function openReviewBox(id){
+    $.ajax({
+      url:`/get-post-data/${String(id)}/`,
+      success:function(data){
+        const contents = $(`
+            <div class="review-row">
+              <span class="rest-title">상호명</span>
+              <div class="rest-data">${data.name}</div>
+            </div>
+            <div class="review-row">
+              <span class="rest-title">메인메뉴</span>
+              <div class="rest-data">${data.menus}</div>
+            </div>
+            <div class="review-row">
+              <span class="rest-title">지번주소</span>
+              <div class="rest-data">${data.numberAddr}</div>
+            </div>
+            <div class="review-row">
+              <span class="rest-title">도로명주소</span>
+              <div class="rest-data">${data.roadAddr}</div>
+            </div>
+            <div class="review-row">
+              <span class="rest-title">전화번호</span>
+              <div class="rest-data">${data.phone}</div>
+            </div>`);
+        $("#rest-container").append(contents);
+        data.comments && data.comments.forEach((item)=>{
+          let stars = "";
+          for (let i=1; i<6; i++){
+            if(i<=item.score){
+              stars += `<svg class="scored" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" ><g><path d="M0,0h24v24H0V0z" fill="none"/><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"/></g></svg>`;
+            } else {
+              stars += `<svg class="no-scored"xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" ><g><path d="M0,0h24v24H0V0z" fill="none"/><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"/></g></svg>`;
+            }
+          }
+          let elem = "";
+          if (String(item.user.id) === '{{request.user.id}}'){
+            elem = 
+              $(`<li class="comment-list-item">
+                  <div class="user">${item.user.nickname}</div>
+                  <div class="score">${stars}</div>
+                  <div class="contents">${item.contents}</div>
+                  <button class="delete" onClick="deleteComment(${item.id})">✕</button>
+                </li>`);
+              $("#comment-list").append(elem);
+          } else {
+            elem = 
+              $(`<li class="comment-list-item">
+                  <div class="user">${item.user.nickname}</div>
+                  <div class="score">${stars}</div>
+                  <div class="contents">${item.contents}</div>
+                </li>`);
+              $("#comment-list").append(elem);
+          }
+        })
+        reviewId = id;
+      }
+    })
+    document.getElementById("review-box").classList.remove('hide');
+  }
+
+  function hideReviewBox(){
+    reviewId = null;
+    document.getElementById("rest-container").innerHTML="";
+    document.getElementById('comment-list').innerHTML="";
+    document.getElementById('review-box').classList.add('hide');
+    $('#stars').rateit('reset');
+    $('#comment-comment').val('');
+  }
+
+  function commentHandler(){
+    const score = $('#stars').rateit('value');
+    if(!score){
+      alert("별점을 선택해주세요.");
+      return false;
+    }
+    const contents = $('#comment-comment').val();
+    if(!contents){
+      alert("내용을 입력해주세요.");
+      return false;
+    }
+    const tempReviewId = reviewId;
+    const data = new FormData();
+    data.append("id",reviewId);
+    data.append("contents",contents);
+    data.append("score",score);
+    $.ajax({
+      url : "/create-comment/",
+      method : "post",
+      data : data,
+      contentType:false,
+      processData:false,
+      success : function(data){
+        hideReviewBox();
+        openReviewBox(tempReviewId);
+      }
+    });
+    console.log(reviewId)
+    console.log(contents)      
+    console.log(score);
+  }
+  function deleteComment(id){
+    if(confirm("정말로 리뷰를 삭제하시겠습니까?")){
+      const data = new FormData();
+      data.append('id',id);
+      $.ajax({
+        url:"/delete-comment/",
+        data : data,
+        processData:false,
+        contentType:false,
+        method:"post",
+        success:function(data){
+          console.log(data)
+          hideReviewBox();
+          openReviewBox(data.postId);
+        }
+      })
+    }
+  }
+  function updateMarkersOnMap(posts){
+    clusterer.clear();
+    for(let i=0; i<posts.length; i++){
+      const markerPosition = new kakao.maps.LatLng(posts[i].latitude, posts[i].longitude);
+      const colorType = posts[i].classification__color; //svg마커 색      
+      let className = "titleOverlay";
+      if(map.getMapTypeId() === 3){
+        className = "titleOverlay white";
+      } 
+      const markerSvg = $(`
+        <div>
+          <img class="overlayMarker" src="{% static 'img/home.svg' %}"" />
+          <div class="${className}">${posts[i].name}</div>
+        </div>
+      `)[0];
+      markerSvg.addEventListener('click',()=>{map.panTo(markerPosition);getOverlayInfo(posts[i].id, posts[i].latitude, posts[i].longitude)});
+      const postMarker = new kakao.maps.CustomOverlay({
+        position : markerPosition,
+        content : markerSvg,
+        clickable: true,  //맵 더블 클릭 방지
+        zIndex: 2,
+      });
+      clusterer.addMarker(postMarker);
+    }
+  }
+  //fold-container 버튼 클래스 토글
+  function toggleFoldBtn(event){
+    for(let i=0; i<document.getElementsByClassName('chip-btn').length; i++){
+      document.getElementsByClassName('chip-btn')[i].classList.remove('activated');
+    }
+    event.target.classList.add('activated');
+    if(event.target === document.getElementById("allPostBtn") || event.target === document.getElementById("filteredPostBtn")){
+      document.getElementsByClassName('recent-box')[0].classList.remove("hide");
+      document.getElementsByClassName('image-box')[0].classList.add("hide");
+    } else {
+      document.getElementsByClassName('recent-box')[0].classList.add("hide");
+      document.getElementsByClassName('image-box')[0].classList.remove("hide"); 
+    }    
+  }
+
+  //fold-container에 자료 리스트 페이지네이션 : isSearching, isFiltering에 따라 리턴 결과가 다름
+  function getPagedPosts(page, isMain){
+    if(page === undefined){
+      page = 1;
+    }
+    const data = {}
+    let comment = "";
+    if(isMain === true){
+      comment = "전체 게시물";
+    }
+    else if(searchWatcher.isSearching){
+      data['keyword'] = searchValue;
+      comment = "검색 결과";
+    } else if(filterWatcher.isFiltering){
+      data['isFiltering'] = true;
+      data['name'] = filterName;
+      data['menus'] = filterMenus;
+      data['location'] = filterLocation;
+      comment = "필터링 결과";
+    } else {
+      comment = "전체 게시물";
+    }
+    $.ajax({
+      url : `/get-paged-post/${String(page)}/`, 
+      data : data,
+      success : function(data){
+        document.getElementsByClassName("recent-comment")[0].textContent = comment;
+        document.getElementsByClassName("recent-box")[0].innerHTML = 
+          `<div class="row head">
+            <div class="column">Num</div>
+            <div class="column">메인메뉴</div>
+            <div class="column">상호</div>
+            <div class="column">전화번호</div>
+          </div>`;
+        const {posts, pageFirst, pagePrev, pageNext, pageLast, currentPage} = data;      
+
+        let clickHandler = "";
+        posts.map((item,index)=>{
+          clickHandler = `getOverlayInfo(${item.id},${item.latitude},${item.longitude});`
+          const num = ((currentPage-1)*15) + index + 1;
+          const element = $(
+            `<div onClick="map.setLevel(1); ${clickHandler}">
+              <div class="row">
+                <div class="column">${num}</div>
+                <div class="column">${item.menus && item.menus.split(",")[0]}</div>
+                <div class="column">${item.name}</div>
+                <div class="column font-small">${item.phone}</div>
+              </div>
+            </div>`
+          );
+          document.getElementsByClassName("recent-box")[0].appendChild(element[0]);
+        });
+
+        const pageRange = Array.from({length: pageNext-pagePrev+1}, (x, i) => i + pagePrev).map((number)=>
+          (Number(number)===Number(page)) ? `<button class="activated" onclick='getPagedPosts(${number},${isMain})'>${number}</button>`: `<button onclick='getPagedPosts(${number},${isMain})'>${number}</button>`
+        );
+        let pageText = "";
+        for(let i=0; i<pageRange.length; i++){
+          pageText += pageRange[i];
+        }
+        const pagenationElement = $(
+          `<div class="pagination">
+            ${page>=5 ? `<button onclick='getPagedPosts(${pageFirst},${isMain})'><</button>` : ''}
+            ${pageText}
+            ${page<pageLast-3 ? `<button onclick='getPagedPosts(${pageLast},${isMain})'>></button>` : ''}
+          </div>`
+          );
+        document.getElementsByClassName("recent-box")[0].appendChild(pagenationElement[0]);
+      }
+    })
+  }
+  //전체 게시물 버튼 클릭 핸들러
+  function showAllResult(event){
+    //isSearching과 isFiltering을 변경 안하고 필터링 제거 필요
+    getPagedPosts(1,true);
+    getBoundaryPost(true);
+    customInfowindow.setMap(null);
+    toggleFoldBtn(event);
+  }
+  //필터링 결과 버튼 클릭 핸들러
+  function showFilteredResult(event){
+    if(searchWatcher.isSearching || filterWatcher.isFiltering){
+      getPagedPosts(1);
+      getBoundaryPost();
+      customInfowindow.setMap(null);
+      toggleFoldBtn(event);
+    }
+    else {
+      alert("검색어를 입력하거나 필터를 설정해주세요.")
+    }
+  }
+  
+   //필터칭 열기
+  function openFilterDetail(){
+    const form = document.getElementById('filter-form');
+    form.name.value = filterName;
+    form.menus.value = filterMenus;
+    form.location.value = filterLocation;
+
+    document.getElementsByClassName('filter-content')[0].classList.remove('hide');
+  }
+  //필터창 닫기
+  function closeFilterDetail(){
+    document.getElementsByClassName('filter-content')[0].classList.add('hide');
+  }
+  //필터 적용을 누를 시 동작하는 함수
+  let filterName=null, filterMenus=null, filterLocation=null;
+  function applyFilter(){
+    const form = document.getElementById('filter-form');
+    if(form.name.value || form.menus.value || form.location.value){
+      filterWatcher.isFiltering = true;
+      filterName = form.name.value;
+      filterMenus = form.menus.value;
+      filterLocation = form.location.value;
+      getBoundaryPost();
+      document.getElementById('filteredPostBtn').click();
+      closeFilterDetail();     
+    } else{
+      alert("최소 1개 이상의 조건을 설정해주세요.")
+    }
+  }
+  //필터 초기화 함수
+  function resetFilter(){
+    const form = document.getElementById('filter-form');
+    closeFilterDetail();
+    form.reset();
+    filterName = null;
+    filterMenus=null;
+    filterLocation=null;
+    filterLocation=null;
+    if(!filterWatcher.isFiltering){
+      return false;
+    }
+    filterWatcher.isFiltering = false;
+    getBoundaryPost();
+    document.getElementById('allPostBtn').click();
+  }
+  //filter모달 외부영역 클릭시 닫기
+  if('{{user.is_staff}}' === 'True'){
+    document.addEventListener('mouseup',(event)=>{
+      const filterModal = document.getElementsByClassName('filter-content')[0];
+      if($(filterModal).has(event.target).length === 0 && event.target !== document.getElementsByClassName('filter-content')[0]){
+          filterModal.classList.add('hide');
+      }
+    });
+  }
+  
+
+  //일반 검색 구현부
+  const input_elem = document.getElementById("search-input");
+  let searchValue = "";
+  function searchHandler(){
+    if(input_elem.value){
+        searchWatcher.isSearching = true;
+        filterWatcher.isFiltering = false;
+        searchValue = input_elem.value;
+        document.getElementById('filteredPostBtn').click();
+    } else {
+      searchWatcher.isSearching = false;
+      filterWatcher.isFiltering = false;
+      document.getElementById('allPostBtn').click();
+    }
+    searchValue = input_elem.value;
+    getBoundaryPost();
+  }
+  //좌측 검색창에 엔터 입력시 검색
+  input_elem.addEventListener("keydown", function (event) {
+    if (event.keyCode == 13) {
+      event.preventDefault();
+      event.stopPropagation();
+      searchHandler();
+    }
+  });
+  //좌측 검색창 검색 버튼 클릭시 검색
+  document.getElementById('map-search-btn').addEventListener('click', ()=>{
+    searchHandler();
+  });
+  $( function() {
+    $( "#tabs" ).tabs();
+  } );
+</script>
+{% endblock script %}

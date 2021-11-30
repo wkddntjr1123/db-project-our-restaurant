@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auth.css'%}" />
+{% endblock head %}
+
+{% block content %}
+<main class="auth-container">
+  <h2>회원가입</h2>
+  <div class="login-box">
+    <form action="/user/signup/" method="POST" onsubmit="return validation();" id="signup_form">
+      {% csrf_token %}
+      <label for="name">아이디</label>
+      <div class="with-error">
+        <input class="myInput" type="text" name="username" id="id" required />
+        <div id="idc"></div>
+      </div>
+      <label for="password">비밀번호</label>
+      <div class="with-error">
+        <input class="myInput" type="password" name="password" id="pwd" required />
+        <div id="pwdc"></div>
+      </div>
+      <label for="password2">비밀번호 확인</label>
+      <div class="with-error">
+        <input class="myInput" type="password" name="password2" id="pwd2" required />
+        <div id="pwdc2"></div>
+      </div>
+      <label for="name">이름</label>
+      <div class="with-error">
+        <input class="myInput" type="text" name="name" id="name" required />
+        <div id="namec"></div>
+      </div>
+      <label for="email">닉네임</label>
+      <div class="with-error">
+        <input class="myInput" type="text" name="email" id="mail" required />
+        <div id="mailc"></div>
+      </div>
+      <button id="submitBtn" type="submit" class="myBtn">가입하기</button>
+    </form>
+    <div class="home mobile"><a href="/">메인으로</a></div>
+  </div>
+</main>
+{% endblock content %}
+
+{% block script %}
+<script>
+  //정규식  
+  const idRegExp = new RegExp(/^[a-zA-Z0-9]{5,20}$/); //id와 pwassword 유효성 검사 정규식 : 5~20자의 영문 대소문자와 숫자
+  const nickNameRegExp = new RegExp(/^[가-힣a-zA-Z0-9]{2,20}$/); //총 20자
+  const nameRegExp = new RegExp(/^[가-힣]{2,10}$/); //이름 유효성검사 정규식 : 2~10의한글
+
+  const signForm = document.getElementById('signup_form');
+  
+  const idInput = signForm['username']
+  const pwdInput = signForm['password']
+  const pwdCheckInput = signForm['password2']
+  const nameInput = signForm['name']
+  const emailInput = signForm['email']
+
+  let idCheck = false;
+  let pwdCheck = false;
+  let pwdDuplicateCheck = false;
+  let nameCheck = false;
+  let emailCheck = false;
+  pwdInput.addEventListener('keyup',function(){
+    if(!idRegExp.test(event.target.value)){
+      document.getElementById('pwdc').textContent = "5~20자의 영문 대소문자, 숫자로 입력해주십시오.";
+      pwdCheck = false;
+    } else {
+      document.getElementById('pwdc').textContent = "";
+      pwdCheck = true;
+    }
+  });
+  pwdInput.addEventListener('focusout',function(){
+    if(pwdInput.value !== pwdCheckInput.value){
+      document.getElementById('pwdc2').textContent = "입력한 두 비밀번호가 다릅니다.";
+      pwdDuplicateCheck = false;
+    } else {
+      document.getElementById('pwdc2').textContent = "";
+      pwdDuplicateCheck = true;
+    }
+  });
+  pwdCheckInput.addEventListener('focusout',function(){
+    if(pwdInput.value !== pwdCheckInput.value){
+      document.getElementById('pwdc2').textContent = "입력한 두 비밀번호가 다릅니다.";
+      pwdDuplicateCheck = false;
+    } else {
+      document.getElementById('pwdc2').textContent = "";
+      pwdDuplicateCheck = true;
+    }
+  });
+  pwdCheckInput.addEventListener('keyup',function(){
+    if(pwdInput.value !== pwdCheckInput.value){
+      document.getElementById('pwdc2').textContent = "입력한 두 비밀번호가 다릅니다.";
+      pwdDuplicateCheck = false;
+    } else {
+      document.getElementById('pwdc2').textContent = "";
+      pwdDuplicateCheck = true;
+    }
+  });
+  nameInput.addEventListener('keyup',function(){
+    if(!nameRegExp.test(event.target.value)){
+      document.getElementById('namec').textContent = "2~10자의 한글을 입력해주세요.";
+      nameCheck = false;
+    } else {
+      document.getElementById('namec').textContent = "";
+      nameCheck = true;
+    }
+  });
+  emailInput.addEventListener('keyup',function(){
+    if(!nickNameRegExp.test(event.target.value)){
+      document.getElementById('mailc').textContent = "2~20자의 영어,한글,숫자를 입력해주세요.";
+      emailCheck = false;
+    } else {
+      document.getElementById('mailc').textContent = "";
+      emailCheck = true;
+    }
+  });
+  
+  idInput.addEventListener("keyup", function (event) {
+    if(!idRegExp.test(event.target.value)){
+      document.getElementById('idc').textContent = "5~20자의 영문 대소문자, 숫자로 입력해주십시오.";
+      idCheck = false;
+      return false;
+    } else {
+      fetch(`/user/check_id/?username=${event.target.value}`, {})
+      .then(function (response) {
+        return response.json();
+      })
+      .then((response) => response.data == "exist")
+      .then((check) => {
+        if (check) {
+          document.getElementById("idc").textContent = "이미 존재하는 아이디입니다.";
+          idCheck = false;
+        } else {
+          document.getElementById("idc").textContent = "";
+          idCheck = true;
+        }
+      });
+    }
+  });
+
+  function validation() {
+    if(idCheck && pwdCheck && pwdDuplicateCheck && nameCheck && emailCheck){
+      document.getElementById("submitBtn").setAttribute("disabled", "disabled");
+      document.getElementById("submitBtn").style.cursor = "wait";
+    } else {
+      alert('올바르지 않은 입력이 존재합니다. 다시 확인해 주세요.');
+      return false;
+    }
+  }
+
+  //엔터키 입력시 제출 막기
+  document.getElementById("signup_form").addEventListener(
+    "keydown",
+    function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+      }
+    },
+    true,
+  );
+</script>
+{% endblock script%}
