@@ -16,7 +16,7 @@ class Restaurant(models.Model):
     longitude = models.FloatField()
 
     class Meta:
-        db_table = "restaurant_restaurent"
+        db_table = "restaurent"
 
 
 # 평가 : user연결, restaurant연결
@@ -29,4 +29,4 @@ class Comment(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "restaurant_comment"
+        db_table = "comment"

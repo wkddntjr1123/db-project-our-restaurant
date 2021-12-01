@@ -1,4 +1,5 @@
 from django.core.paginator import EmptyPage, Paginator
+from django.db.models.expressions import F
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -6,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Comment, Restaurant
 from django.db.models import Q
 from django.forms.models import model_to_dict
-from authentication.models import User
+from authentication.models import Group, GroupAndMember, User
 import os, json
 
 
@@ -210,7 +211,6 @@ def getPostData(request, id):
         returnObject.update({"comments": commentsData})
     else:
         returnObject = model_to_dict(rawPost)
-    print(returnObject)
     return JsonResponse(returnObject, safe=False)
 
 
@@ -235,3 +235,32 @@ def deleteComment(request):
     postId = comment.restaurant.id
     comment.delete()
     return JsonResponse({"postId": postId})
+
+
+def getGroupReviewData(request, id):
+    user = request.user
+    rawComments = Comment.objects.filter(restaurant_id=id)
+    groupComments = []
+    groupIdDomain = []
+    rawGroupDomain = GroupAndMember.objects.filter(user=request.user).values_list("group_id")
+    for group in rawGroupDomain:
+        groupIdDomain.append(group[0])
+
+    for comment in rawComments:
+        dictComment = model_to_dict(comment)
+        rawGroups = GroupAndMember.objects.filter(user=comment.writer).values_list("group_id")
+        commentGroupDomain = []
+        for group in rawGroups:
+            commentGroupDomain.append(group[0])
+
+        intersectGroupId = set(groupIdDomain) & set(commentGroupDomain)
+        if len(intersectGroupId):
+            groupComments.append(
+                {
+                    "id": dictComment["id"],
+                    "user": model_to_dict(user, ["id", "nickname"]),
+                    "score": dictComment["score"],
+                    "contents": dictComment["contents"],
+                }
+            )
+    return JsonResponse(groupComments, safe=False)

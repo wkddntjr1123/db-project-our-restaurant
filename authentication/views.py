@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import auth
-from .models import Group, User
+from .models import Group, GroupAndMember, User
 from django.http.response import JsonResponse
 
 
@@ -113,3 +113,72 @@ def accountUpdate(request):
 def user_management(request):
     groups = Group.objects.all()
     return render(request, "user/management.html", {"groups": groups})
+
+
+@csrf_exempt
+def createGroup(request):
+    new_group = Group.objects.create(name=request.POST["name"], manager=request.user)
+    GroupAndMember.objects.create(group=new_group, user=request.user, accept=True)
+    return JsonResponse({"id": new_group.id})
+
+
+@csrf_exempt
+def inviteUser(request):
+    nickname = request.POST["nickname"]
+    group_id = request.POST["id"]
+    print(nickname)
+    print(group_id)
+    try:
+        user = User.objects.get(nickname=nickname)
+    except:
+        return JsonResponse({"success": False})
+    group = Group.objects.get(id=group_id)
+    GroupAndMember.objects.create(user=user, group=group)
+    return JsonResponse({"success": True})
+
+
+@csrf_exempt
+def acceptInvite(request):
+    id = request.POST["id"]
+    relation = GroupAndMember.objects.get(id=id)
+    relation.accept = True
+    relation.save()
+    return JsonResponse({"id": relation.id})
+
+
+@csrf_exempt
+def declineInvite(request):
+    id = request.POST["id"]
+    relation = GroupAndMember.objects.get(id=id)
+    relation.delete()
+    return JsonResponse({})
+
+
+@csrf_exempt
+def getOwnGroupData(request):
+    groups = Group.objects.filter(manager=request.user)
+    rawData = groups.values()
+    data = []
+    for item in rawData:
+        item["created_date"] = str(item["created_date"])[0:10]
+        data.append(item)
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def getMyGroupData(request):
+    relations = GroupAndMember.objects.filter(user=request.user, accept=True)
+    groups = []
+    for relation in relations:
+        groups.append({"id": relation.group.id, "name": relation.group.name})
+    return JsonResponse(groups, safe=False)
+
+
+@csrf_exempt
+def getInvitedData(request):
+    relations = GroupAndMember.objects.filter(user=request.user, accept=False)
+    # print(relations)
+    data = []
+    for relation in relations:
+        data.append({"id": relation.id, "name": relation.group.name})
+    return JsonResponse(data, safe=False)

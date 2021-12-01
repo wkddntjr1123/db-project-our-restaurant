@@ -12,4 +12,5 @@ urlpatterns = [
     path("get-paged-post/<int:page>/", views.getPagedPost),
     path("create-comment/", views.createComment),
     path("delete-comment/", views.deleteComment),
+    path("get-group-review-data/<int:id>/", views.getGroupReviewData),
 ]

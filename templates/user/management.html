@@ -7,6 +7,7 @@
     background: url(/static/img/intro.jpg) no-repeat;
     background-size: cover;
     backdrop-filter: brightness(0.8);
+    overflow: hidden;
   }
   main{
     flex-grow: 1;
@@ -27,10 +28,12 @@
     height: 100%;
     box-shadow: 0 0 3px 1px #c2c2c2;
     border-radius: 3px;
-    gap: 2em;
+    position: relative;
+    max-height: 440px;
   }
   .sub_container > h2 {
     padding: 2em;
+    white-space:nowrap;
   }
   .sub_container .contents-area{
     flex: 1;
@@ -39,45 +42,334 @@
     flex-direction: column;
     align-items: center;
     overflow-y: scroll;
+    padding-left: 6px;
   }
+  .modal-box {
+    display:none;
+    position:absolute;
+    z-index:1000;
+    width: 40%;
+    background:white;
+    border-bottom:1px solid #aaa;
+    border-radius:4px;
+    box-shadow:0 3px 9px rgba(0,0,0,0.5);
+    border:1px solid rgba(0,0,0,0.1);
+    background-clip: padding-box;
+  }
+  .modal-box header,
+  .modal-box .modal-header {
+    padding:1.25em 1.5em;
+    border-bottom:1px solid #ddd;
+  }
+  .modal-box header h3,
+  .modal-box header h4,
+  .modal-box .modal-header h3,
+  .modal-box .modal-header h4 {margin:0; }
+  .modal-box .modal-body {
+    padding: 2em 1.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-box footer,.modal-box .modal-footer {
+    padding:1em;
+    border-top:1px solid #ddd;
+    background: rgba(0,0,0,0.02);
+    text-align:right;
+  }
+  .modal-overlay {
+    opacity:0;
+    filter: alpha(opacity=0);
+    position:absolute;
+    top:0;
+    left:0;
+    z-index:900;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.3)!important;
+  }
+  #box1 .item1{
+    display: flex;
+    width: 80%;
+    justify-content: space-between;
+    padding: 6px;
+    margin: 4px;
+    box-shadow: 0 0 2px 1px #c2c2c2;
+    cursor: pointer;
+  }
+  .item1 .title{
+    font-size: 1.1em;
+  }
+  .item1 .date{
+    font-size: 0.9em;
+    color: #8b8b8b;
+  }
+
+  #box2 .item2{
+    display: flex;
+    width: 80%;
+    justify-content: center;
+    padding: 6px;
+    margin: 4px;
+    box-shadow: 0 0 2px 1px #c2c2c2;
+  }
+  #box3 .item3{
+    display: flex;
+    padding: 6px;
+    margin: 4px;
+    align-items: center;
+    box-shadow: 0 0 2px 1px #c2c2c2;
+  }
+  #box3 svg{
+    cursor: pointer;
+  }
+
 </style>
 {% endblock head %}
 
 {% block content %}
-  <div class="sub_container">
-    <h2>내가 만든 그룹 관리</h2>
-    <!-- <div class="contents-area"> 멤버초대 버튼 / 속한멤버리스트(멤버삭제)</div> -->
-    <ul class="contents-area">
-      <li>test</li>
+  <div class="sub_container" style="padding-bottom: 50px;">
+    <h2>내가 만든 그룹 관리</h2><a class="js-open-modal myBtn" href="#" data-modal-id="popup" style="position: absolute;bottom: 10px;">새 그룹 추가</a>
+    <ul id="box1" class="contents-area">
     </ul>
   </div>
   <div class="sub_container">
     <h2>내가 속한 그룹</h2>
-    <!-- <div class="contents-area">속한그룹리스트 (탈퇴/멤버보기)</div> -->
-    <ul class="contents-area">
-      <li>test</li>
+    <ul id="box2" class="contents-area">
     </ul>
   </div>
   <div class="sub_container">
     <h2>내가 받은 초대</h2>
-    <!-- <div class="contents-area">초대요청리스트 (초대수락/초대거절)</div> -->
-    <ul class="contents-area">
-      <li>test</li>
+    <ul id="box3" class="contents-area">
     </ul>
   </div>
-  
+  <div id="popup" class="modal-box"> 
+    <header>
+      <a href="#" class="js-modal-close close" style="display: none;">×</a>
+      <h3>그룹 생성</h3>
+    </header>
+    <div class="modal-body">
+      <input id="input-group-name" type="text" placeholder="그룹 이름을 입력하세요." style="border: none; box-shadow: 0 0 2px 1px #c2c2c2; padding: 0.6em;"/>
+      <button type="button" onclick="createGroup();" class="myBtn">추가하기</button>
+    </div>
+    <footer>
+      <a href="#" id="model-close-btn" class="js-modal-close">닫기</a>
+    </footer>
+  </div>  
+  <style>
+    #my-modal{
+      position: absolute;
+      width: 100vw;
+      height: 110vh;
+      background: #2828283d;
+      display: none;
+    }
+    #my-modal .inner-container{
+      position: absolute;
+      top: 47%;
+      left: 50%;
+      width: 450px;
+      height: 300px;
+      background: white;
+      border-radius: 4px;
+      transform: translate(-50%,-50%);
+      display: flex;
+      flex-direction: column;
+    }
+    #my-modal-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1em;
+      border-bottom: 1px solid #c2c2c2;
+    }
+    #my-modal-contents{
+      padding: 1em;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #my-modal-contents input{
+      font-family: inherit;
+      padding: 0.6em;
+      border: none;
+      box-shadow: 0 0 1px 2px #c2c2c2;
+    }
+  </style>
+  <div id="my-modal">
+    <div class="inner-container">
+      <div id="my-modal-head"><span id="my-modal-title"></span><button type="button" style="background-color: transparent;" onclick="$('#my-modal').fadeOut()">×</button></div>
+      <div id="my-modal-contents"></div>
+    </div>
+  </div>
 {% endblock content %}
 
 {% block script %}
 <script>
+  $(window).ready(function(){
+    UIupdate();
+  });
+  let inviteGroupId = null;
+  function UIupdate(){
+    updateBox1();
+    updateBox2();
+    updateBox3(); 
+  }
+  function updateBox1(){
+    $("#box1").empty();
+    $.ajax({
+      url:"/user/get-own-group-data/",
+      success:function(data){
+        data.forEach((item)=>{
+          const li = $(`
+            <li class="item1">
+              <div class="title">${item.name}</div>
+              <div class="date">${item.created_date}</div>
+            </li>
+          `)
+          li.click(()=>{
+            $("#my-modal").fadeIn();
+            $("#my-modal-title").text("그룹에 유저 초대");
+            $("#my-modal-contents").html($( $(`
+              <input id="invite-user-input" type="text" placeholder="유저의 닉네임을 입력하세요."/>
+              <button type="button" class="myBtn" onClick="inviteUser();">초대하기</button>
+            `)));
+            inviteGroupId = item.id;
+          })
+          $("#box1").append(li);
+        })
+      }
+    });
+  }
+  function updateBox2(){
+    $("#box2").empty();
+    $.ajax({
+      url:"/user/get-my-group-data/",
+      success:function(data){
+        data.forEach((item)=>{
+          const li = $(`
+            <li class="item2">
+              <div class="title" style="text-align:center;">${item.name}</div>
+            </li>
+          `);
+          $("#box2").append(li);
+        })
+      }
+    });
+  }
+  function updateBox3(){
+    $("#box3").empty();
+    $.ajax({
+      url:"/user/get-invite-data/",
+      success:function(data){
+        data.forEach((item)=>{
+          const li = $(`
+            <li class="item3">
+              <div class="title" style="text-align:center;"><span style="font-weight:bold; font-size:1.3em;">${item.name}</span>으로 부터의 초대</div>
+              <svg onclick="acceptInvite(${item.id});" xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 0 24 24" width="22px" fill="#00b40c"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>  
+              <svg onclick="declineInvite(${item.id});" xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 0 24 24" width="22px" fill="red"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+            </li>
+          `)
+          $("#box3").append(li);
+        })
+      }
+    });
+  }
   function createGroup(){
-
+    const name = document.getElementById("input-group-name").value;
+    if (!name){
+      alert("그룹명을 입력해주세요.");
+      return false;
+    }
+    const data = new FormData()
+    data.append("name",name);
+    $.ajax({
+      url:"/user/create-group/",
+      method:"post",
+      processData:false,
+      contentType:false,
+      data:data,
+      success:function(data){
+        document.getElementById("input-group-name").value = "";
+        document.getElementById("model-close-btn").click();
+        UIupdate();
+      }
+    })
   }
   function inviteUser(){
-
+    const data = new FormData();
+    data.append("id",inviteGroupId);
+    data.append("nickname",document.getElementById("invite-user-input").value);
+    $.ajax({
+      url:"/user/invite-user/",
+      method:"post",
+      processData:false,
+      contentType:false,
+      data:data,
+      success:function(data){
+        console.log(data)
+        if(data.success){
+          UIupdate();
+          $("#my-modal").fadeOut();
+          alert("해당 유저에게 초대 요청을 보냈습니다.");
+        } else{
+          alert("해당 닉네임의 유저는 없습니다.")
+        }
+      }
+    })
   }
-  function acceptInvite(){
-
+  function acceptInvite(id){
+    const data = new FormData();
+    data.append("id",id);
+    $.ajax({
+      url:"/user/accept-invite/",
+      processData:false,
+      contentType:false,
+      method:"post",
+      data:data,
+      success:function(){
+        UIupdate();
+      }
+    })
   }
+  function declineInvite(id){
+    const data = new FormData();
+    data.append("id",id);
+    $.ajax({
+      url:"/user/decline-invite/",
+      method:"post",
+      processData:false,
+      contentType:false,
+      data:data,
+      success:function(){
+        UIupdate();
+      }
+    })
+  }
+  $(function(){
+    let appendthis =  ("<div class='modal-overlay js-modal-close'></div>");
+      $('a[data-modal-id]').click(function(e) {
+        e.preventDefault();
+        $("body").append(appendthis);
+        $(".modal-overlay").fadeTo(200, 0.7);
+        let modalBox = $(this).attr('data-modal-id');
+        $('#'+modalBox).fadeIn($(this).data(),function(){
+          document.getElementById("popup").style.display="flex";
+        });
+      }); 
+    $(".js-modal-close, .modal-overlay").click(function() {
+      $(".modal-box, .modal-overlay").fadeOut(200,function() {
+        $(".modal-overlay").remove();
+      });
+    });
+    $(window).resize(function() {
+      $(".modal-box").css({
+        top: ($(window).height() - $(".modal-box").outerHeight()) / 2,
+        left: ($(window).width() - $(".modal-box").outerWidth()) / 2,
+      });
+    });
+    $(window).resize();
+  });
 </script>
 {% endblock script %}

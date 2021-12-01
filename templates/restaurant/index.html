@@ -229,42 +229,49 @@
       .rateit button.rateit-reset{
         display: none !important;
       }
-      #comment-list{
+      #comment-list, #comment-list2{
         display: flex;
         flex-direction: column;
         padding: 17px;
         font-family: 'Noto Sans KR';
       }
-      #comment-list .comment-list-item{
+      #comment-list .comment-list-item,
+      #comment-list2 .comment-list-item2{
         display: flex;
         gap: 7px;
         box-shadow: 0 0 2px 0px #d0d0d0;
         padding: 8px;
       }
-      #comment-list .comment-list-item .user{
+      #comment-list .comment-list-item .user,
+      #comment-list2 .comment-list-item2 .user2{
         font-weight: bold;
         font-size: 1.1em;
         width: 110px;
         text-align: center;
         white-space: nowrap;
       }
-      #comment-list .comment-list-item .score{
+      #comment-list .comment-list-item .score,
+      #comment-list2 .comment-list-item2 .score2{
         padding-right: 10px;
       }
-      #comment-list .comment-list-item .score svg.scored{
+      #comment-list .comment-list-item .score svg.scored,
+      #comment-list2 .comment-list-item2 .score2 svg.scored2{
         width: 17px;
         height: 17px;
         fill: #ff6060;
       } 
-      #comment-list .comment-list-item .score svg.no-scored{
+      #comment-list .comment-list-item .score svg.no-scored,
+      #comment-list2 .comment-list-item2 .score2 svg.no-scored2{
         width: 17px;
         height: 17px;
         fill: #7f7f7f;
       } 
-      #comment-list .comment-list-item .contents{
+      #comment-list .comment-list-item .contents,
+      #comment-list2 .comment-list-item2 .contents2{
         flex: 1;
       }
-      #comment-list .comment-list-item .delete{
+      #comment-list .comment-list-item .delete,
+      #comment-list2 .comment-list-item2 .delete2{
         background-color: transparent;
         font-weight: bold;
       }
@@ -281,7 +288,7 @@
               <div id="rest-container"></div>
               <div id="comment-box">
                 <div class="comment-user">리뷰</div>
-                <textarea id="comment-comment" class="comment-comment" placeholder="추천하는 이유는?"></textarea>
+                <textarea id="comment-comment" class="comment-comment" placeholder="내용을 입력해주세요."></textarea>
                 <select id="starRange">
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -296,7 +303,7 @@
             <ul id="comment-list"></ul>
           </div>
           <div id="tabs-2">
-            그룹리뷰
+            <ul id="comment-list2"></ul>
           </div>
         </div>
         <button class="review-hide" onclick="hideReviewBox();">✕</button>
@@ -377,7 +384,6 @@ if(isMobile){
       document.getElementsByClassName('fold-container')[0].classList.add('fold-container-hide');
     }
   }
-  
   //지도의 영역 계산 -> 서버에서 해당 보이는 부분의 마커 정보(id,title,latitude,longitude,classificationId,color)받아오고, 마커를 지도에 업데이트
   //추가적으로 필터링이 적용중이면 필터링 ajax 사용
   //필터링 flag 변경을 감지해서 필터의 적용 유무를 알려줌
@@ -590,6 +596,42 @@ if(isMobile){
         })
         reviewId = id;
       }
+    });
+    $.ajax({
+      url:`/get-group-review-data/${String(id)}/`,
+      success:function(data){
+        console.log(data)
+        data.forEach((item)=>{
+          let stars = "";
+          for (let i=1; i<6; i++){
+            if(i<=item.score){
+              stars += `<svg class="scored2" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" ><g><path d="M0,0h24v24H0V0z" fill="none"/><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"/></g></svg>`;
+            } else {
+              stars += `<svg class="no-scored2"xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" ><g><path d="M0,0h24v24H0V0z" fill="none"/><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"/></g></svg>`;
+            }
+          }
+          let elem = "";
+          if (String(item.user.id) === '{{request.user.id}}'){
+            elem = 
+              $(`<li class="comment-list-item2">
+                  <div class="user2">${item.user.nickname}</div>
+                  <div class="score2">${stars}</div>
+                  <div class="contents2">${item.contents}</div>
+                  <button class="delete2" onClick="deleteComment(${item.id})">✕</button>
+                </li>`);
+              $("#comment-list2").append(elem);
+          } else {
+            elem = 
+              $(`<li class="comment-list-item2">
+                  <div class="user2">${item.user.nickname}</div>
+                  <div class="score2">${stars}</div>
+                  <div class="contents2">${item.contents}</div>
+                </li>`);
+              $("#comment-list2").append(elem);
+          }
+        })
+        reviewId = id;
+      }
     })
     document.getElementById("review-box").classList.remove('hide');
   }
@@ -598,6 +640,7 @@ if(isMobile){
     reviewId = null;
     document.getElementById("rest-container").innerHTML="";
     document.getElementById('comment-list').innerHTML="";
+    document.getElementById('comment-list2').innerHTML="";
     document.getElementById('review-box').classList.add('hide');
     $('#stars').rateit('reset');
     $('#comment-comment').val('');

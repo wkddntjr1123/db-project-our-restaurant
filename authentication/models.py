@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models.deletion import PROTECT
+from django.db.models.deletion import CASCADE, PROTECT
 
 
 class UserManager(BaseUserManager):
@@ -32,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     joined_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "user_user"
+        db_table = "user"
 
     objects = UserManager()
 
@@ -42,10 +42,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # 그룹 엔티티
 class Group(models.Model):
-    name = models.CharField(primary_key=True, max_length=50, unique=True, blank=False, null=False)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, unique=True, blank=False, null=False)
     created_date = models.DateTimeField(auto_now_add=True)
-    users = models.ManyToManyField(User, related_name="users")
     manager = models.ForeignKey(User, on_delete=PROTECT, related_name="manager")
 
     class Meta:
-        db_table = "user_group"
+        db_table = "group"
+
+
+class GroupAndMember(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    group = models.ForeignKey(Group, on_delete=CASCADE)
+    accept = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "user_and_group"

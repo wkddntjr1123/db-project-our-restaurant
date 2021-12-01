@@ -12,4 +12,12 @@ urlpatterns = [
     path("change_password/", views.changePassword, name="changePassword"),
     path("account_update/", views.accountUpdate, name="accountUpdate"),
     path("management/", views.user_management, name="management"),
+    # group update
+    path("create-group/", views.createGroup),
+    path("invite-user/", views.inviteUser),
+    path("accept-invite/", views.acceptInvite),
+    path("decline-invite/", views.declineInvite),
+    path("get-own-group-data/", views.getOwnGroupData),
+    path("get-my-group-data/", views.getMyGroupData),
+    path("get-invite-data/", views.getInvitedData),
 ]
