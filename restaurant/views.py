@@ -258,7 +258,7 @@ def getGroupReviewData(request, id):
             groupComments.append(
                 {
                     "id": dictComment["id"],
-                    "user": model_to_dict(user, ["id", "nickname"]),
+                    "user": model_to_dict(comment.writer, ["id", "nickname"]),
                     "score": dictComment["score"],
                     "contents": dictComment["contents"],
                 }
