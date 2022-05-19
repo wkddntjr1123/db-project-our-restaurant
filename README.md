@@ -1,7 +1,10 @@
 # 우리들의 맛집 : 전주시 그룹별 맛집 공유 서비스
 ## 2021 학부 데이터베이스 프로젝트
 
-# 기술스택 : EC2, Nginx, SQLite, Django
+## 기술스택 : EC2, Nginx, SQLite, Django
+![ezgif-3-04354c5e1c](https://user-images.githubusercontent.com/64186072/169265051-3c749ecc-8209-42cd-a4d6-a9114ba5a14a.gif)
+
+
 
 ### 시스템 구조도
 ![image](https://user-images.githubusercontent.com/64186072/169104340-ff03d4a3-9cae-49d0-8170-4fe01d0fc114.png)
